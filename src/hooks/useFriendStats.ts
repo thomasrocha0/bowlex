@@ -17,13 +17,18 @@ export function useFriendStats(friendProfileId: string) {
 
       if (error) throw error;
 
+      // The function returns zero rows when the caller isn't the owner, an
+      // accepted friend, or the profile isn't public (see stats_visibility).
+      const row = data[0];
+      if (!row) return null;
+
       const stats: GameStats = {
-        average: data.average,
-        highGame: data.high_game,
-        highSeries: data.high_series,
-        strikePercentage: data.strike_percentage,
-        sparePercentage: data.spare_percentage,
-        openFramePercentage: data.open_frame_percentage,
+        average: row.average,
+        highGame: row.high_game,
+        highSeries: row.high_series,
+        strikePercentage: row.strike_percentage,
+        sparePercentage: row.spare_percentage,
+        openFramePercentage: row.open_frame_percentage,
       };
       return stats;
     },

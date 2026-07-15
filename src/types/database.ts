@@ -1,185 +1,445 @@
-/**
- * Hand-written stand-in for the Supabase-generated schema types.
- * Once the schema exists in a real project, replace this file with:
- *   npx supabase gen types typescript --project-id <id> > src/types/database.ts
- */
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
-export type StatsVisibility = "public" | "friends_only" | "private";
-export type FriendshipStatus = "pending" | "accepted" | "declined" | "blocked";
-
-export interface Database {
+export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
-      profiles: {
-        Row: {
-          id: string;
-          username: string;
-          display_name: string;
-          avatar_url: string | null;
-          stats_visibility: StatsVisibility;
-          created_at: string;
-        };
-        Insert: {
-          id: string;
-          username: string;
-          display_name: string;
-          avatar_url?: string | null;
-          stats_visibility?: StatsVisibility;
-        };
-        Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
-        Relationships: [];
-      };
-      leagues: {
-        Row: {
-          id: string;
-          owner_id: string;
-          name: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          owner_id: string;
-          name: string;
-        };
-        Update: Partial<Database["public"]["Tables"]["leagues"]["Insert"]>;
-        Relationships: [
-          {
-            foreignKeyName: "leagues_owner_id_fkey";
-            columns: ["owner_id"];
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      series: {
-        Row: {
-          id: string;
-          profile_id: string;
-          league_id: string | null;
-          bowled_at: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          profile_id: string;
-          league_id?: string | null;
-          bowled_at: string;
-        };
-        Update: Partial<Database["public"]["Tables"]["series"]["Insert"]>;
-        Relationships: [
-          {
-            foreignKeyName: "series_profile_id_fkey";
-            columns: ["profile_id"];
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "series_league_id_fkey";
-            columns: ["league_id"];
-            referencedRelation: "leagues";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      games: {
-        Row: {
-          id: string;
-          series_id: string;
-          profile_id: string;
-          game_number: number;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          series_id: string;
-          profile_id: string;
-          game_number: number;
-        };
-        Update: Partial<Database["public"]["Tables"]["games"]["Insert"]>;
-        Relationships: [
-          {
-            foreignKeyName: "games_series_id_fkey";
-            columns: ["series_id"];
-            referencedRelation: "series";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "games_profile_id_fkey";
-            columns: ["profile_id"];
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
       frames: {
         Row: {
-          id: string;
-          game_id: string;
-          frame_number: number;
-          rolls: number[];
-          created_at: string;
-        };
+          created_at: string
+          frame_number: number
+          game_id: string
+          id: string
+          rolls: number[]
+        }
         Insert: {
-          id?: string;
-          game_id: string;
-          frame_number: number;
-          rolls: number[];
-        };
-        Update: Partial<Database["public"]["Tables"]["frames"]["Insert"]>;
+          created_at?: string
+          frame_number: number
+          game_id: string
+          id?: string
+          rolls: number[]
+        }
+        Update: {
+          created_at?: string
+          frame_number?: number
+          game_id?: string
+          id?: string
+          rolls?: number[]
+        }
         Relationships: [
           {
-            foreignKeyName: "frames_game_id_fkey";
-            columns: ["game_id"];
-            referencedRelation: "games";
-            referencedColumns: ["id"];
+            foreignKeyName: "frames_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "game_scores"
+            referencedColumns: ["game_id"]
           },
-        ];
-      };
+          {
+            foreignKeyName: "frames_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       friendships: {
         Row: {
-          id: string;
-          requester_id: string;
-          addressee_id: string;
-          status: FriendshipStatus;
-          created_at: string;
-          updated_at: string;
-        };
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          status: Database["public"]["Enums"]["friendship_status"]
+          updated_at: string
+        }
         Insert: {
-          id?: string;
-          requester_id: string;
-          addressee_id: string;
-          status?: FriendshipStatus;
-        };
-        Update: Partial<Database["public"]["Tables"]["friendships"]["Insert"]>;
+          addressee_id: string
+          created_at?: string
+          id?: string
+          requester_id: string
+          status?: Database["public"]["Enums"]["friendship_status"]
+          updated_at?: string
+        }
+        Update: {
+          addressee_id?: string
+          created_at?: string
+          id?: string
+          requester_id?: string
+          status?: Database["public"]["Enums"]["friendship_status"]
+          updated_at?: string
+        }
         Relationships: [
           {
-            foreignKeyName: "friendships_requester_id_fkey";
-            columns: ["requester_id"];
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
+            foreignKeyName: "friendships_addressee_id_fkey"
+            columns: ["addressee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "friendships_addressee_id_fkey";
-            columns: ["addressee_id"];
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
+            foreignKeyName: "friendships_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
-        ];
-      };
-    };
-    Views: {};
+        ]
+      }
+      games: {
+        Row: {
+          created_at: string
+          game_number: number
+          id: string
+          profile_id: string
+          series_id: string
+        }
+        Insert: {
+          created_at?: string
+          game_number: number
+          id?: string
+          profile_id: string
+          series_id: string
+        }
+        Update: {
+          created_at?: string
+          game_number?: number
+          id?: string
+          profile_id?: string
+          series_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "games_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "games_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leagues: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leagues_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string
+          id: string
+          stats_visibility: Database["public"]["Enums"]["stats_visibility"]
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name: string
+          id: string
+          stats_visibility?: Database["public"]["Enums"]["stats_visibility"]
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          stats_visibility?: Database["public"]["Enums"]["stats_visibility"]
+          username?: string
+        }
+        Relationships: []
+      }
+      series: {
+        Row: {
+          bowled_at: string
+          created_at: string
+          id: string
+          league_id: string | null
+          profile_id: string
+        }
+        Insert: {
+          bowled_at: string
+          created_at?: string
+          id?: string
+          league_id?: string | null
+          profile_id: string
+        }
+        Update: {
+          bowled_at?: string
+          created_at?: string
+          id?: string
+          league_id?: string | null
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "series_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      game_scores: {
+        Row: {
+          game_id: string | null
+          game_number: number | null
+          profile_id: string | null
+          score: number | null
+          series_id: string | null
+        }
+        Insert: {
+          game_id?: string | null
+          game_number?: number | null
+          profile_id?: string | null
+          score?: never
+          series_id?: string | null
+        }
+        Update: {
+          game_id?: string | null
+          game_number?: number | null
+          profile_id?: string | null
+          score?: never
+          series_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "games_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "games_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
     Functions: {
+      calculate_game_score: { Args: { p_rolls: number[] }; Returns: number }
       get_friend_stats: {
-        Args: { target_profile_id: string };
+        Args: { target_profile_id: string }
         Returns: {
-          average: number;
-          high_game: number;
-          high_series: number;
-          strike_percentage: number;
-          spare_percentage: number;
-          open_frame_percentage: number;
-        };
-      };
-    };
-  };
+          average: number
+          high_game: number
+          high_series: number
+          open_frame_percentage: number
+          spare_percentage: number
+          strike_percentage: number
+        }[]
+      }
+    }
+    Enums: {
+      friendship_status: "pending" | "accepted" | "declined" | "blocked"
+      stats_visibility: "public" | "friends_only" | "private"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
+  public: {
+    Enums: {
+      friendship_status: ["pending", "accepted", "declined", "blocked"],
+      stats_visibility: ["public", "friends_only", "private"],
+    },
+  },
+} as const

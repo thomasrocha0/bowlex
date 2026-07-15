@@ -1,4 +1,8 @@
-export type { Database, StatsVisibility, FriendshipStatus } from "./database";
+import type { Database } from "./database";
+
+export type { Database };
+export type StatsVisibility = Database["public"]["Enums"]["stats_visibility"];
+export type FriendshipStatus = Database["public"]["Enums"]["friendship_status"];
 
 export interface GameStats {
   average: number;

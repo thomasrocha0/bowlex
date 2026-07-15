@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
-import type { FriendshipStatus } from "../types/database";
+import type { FriendshipStatus } from "../types";
 
 export function useRespondToFriendRequest() {
   const queryClient = useQueryClient();
