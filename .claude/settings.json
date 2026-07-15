@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"c:\\\\Users\\\\thoma\\\\Documents\\\\web_dev\\\\bowling_tracker\" && mkdir -p \\\\ *)",
+      "Bash(npx expo *)",
+      "Bash(npx jest *)",
+      "Bash(npx tsc *)",
+      "Bash(xargs grep -l \"Relationships\")",
+      "Bash(xargs grep -l \"GenericSchema\")",
+      "Bash(npx expo-doctor *)"
+    ]
+  }
+}
