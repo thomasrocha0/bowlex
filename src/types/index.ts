@@ -12,3 +12,7 @@ export interface GameStats {
   sparePercentage: number;
   openFramePercentage: number;
 }
+
+export type GameRow = Database["public"]["Tables"]["games"]["Row"];
+export type FrameRow = Database["public"]["Tables"]["frames"]["Row"];
+export type GameWithFrames = GameRow & { frames: FrameRow[] };

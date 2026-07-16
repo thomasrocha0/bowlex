@@ -1,12 +1,30 @@
-import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect } from "react";
+import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
 import { StatTile } from "../../components/StatTile";
 import { Palette } from "../../components/Palette"
 import { createHorizontalScrollStyles } from "../../components/horizontalScrollStyles";
+import { useSession } from "../../hooks/useSession";
+import { useGames } from "../../hooks/useGames";
+import { useGamesStore } from "../../store/useGamesStore";
+import { calculateStats } from "../../lib/stats";
 
 const TILE_GAP = Dimensions.get("window").width * 0.05;
 const scrollStyles = createHorizontalScrollStyles(TILE_GAP);
 
 export function StatsScreen() {
+  const { session } = useSession();
+  const profileId = session?.user.id ?? "";
+  const { data: fetchedGames } = useGames(profileId);
+
+  const games = useGamesStore((state) => state.games);
+  const setGames = useGamesStore((state) => state.setGames);
+
+  useEffect(() => {
+    if (fetchedGames) setGames(fetchedGames);
+  }, [fetchedGames, setGames]);
+
+  const stats = calculateStats(games);
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -15,10 +33,12 @@ export function StatsScreen() {
         style={[scrollStyles.scroll, styles.tileScroll]}
         contentContainerStyle={scrollStyles.content}
       >
-        <StatTile label="Games Played" value="10" />
-        <StatTile label="Average Score" value="150" />
-        <StatTile label="High Score" value="300" />
-        <StatTile label="Best Performance" value="Excellent" />
+        <StatTile label="Average Score" value={stats.averageScore.toFixed(1)} />
+        <StatTile label="High Score" value={String(stats.highGame)} />
+        <StatTile label="Average Pins" value={stats.averagePins.toFixed(1)} />
+        <StatTile label="Strike Rate" value={`${stats.strikePercentage.toFixed(1)}%`} />
+        <StatTile label="Spare Rate" value={`${stats.sparePercentage.toFixed(1)}%`} />
+        <StatTile label="Open Frame Rate" value={`${stats.openFramePercentage.toFixed(1)}%`} />
       </ScrollView>
     </View>
   );
