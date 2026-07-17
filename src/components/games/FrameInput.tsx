@@ -15,6 +15,8 @@ interface FrameInputProps {
   error?: string;
   frameScore?: number | null;
   onChangeBox: (boxIndex: number, char: string) => void;
+  /** Fired on a Backspace keypress (web/iOS only -- see GameInput), even when the box is already empty. */
+  onBackspace: (boxIndex: number) => void;
   /** Lets the parent (GameInput) manage a cross-frame ref table so typing can advance focus into the next frame. */
   registerBoxRef: (boxIndex: number, el: TextInput | null) => void;
   disabled?: boolean;
@@ -37,6 +39,7 @@ export function FrameInput({
   error,
   frameScore,
   onChangeBox,
+  onBackspace,
   registerBoxRef,
   disabled,
 }: FrameInputProps) {
@@ -85,10 +88,14 @@ export function FrameInput({
             ]}
             value={boxes[index] ?? ""}
             onChangeText={(text) => handleChangeText(index, text)}
+            onKeyPress={({ nativeEvent }) => {
+              if (nativeEvent.key === "Backspace") onBackspace(index);
+            }}
             editable={!isBoxDisabled(index)}
             selectTextOnFocus
             maxLength={1}
             autoCapitalize="characters"
+            keyboardType="numbers-and-punctuation"
           />
         ))}
       </View>

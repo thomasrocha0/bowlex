@@ -54,6 +54,27 @@ export function GameInput({ gameNumber, boxChars, onChangeBoxChars }: GameInputP
     }
   };
 
+  // A filled box just clears itself in place; only an already-empty box
+  // steps focus back (into the previous frame's last *filled* box if
+  // already at the start of the current one -- a frame resolved early,
+  // e.g. a strike, still renders a trailing box that's permanently disabled).
+  const handleBackspace = (frameIndex: number, boxIndex: number) => {
+    const currentBoxes = boxChars[frameIndex];
+
+    if (currentBoxes[boxIndex] !== "") {
+      const updated = currentBoxes.map((box, i) => (i < boxIndex ? box : ""));
+      onChangeBoxChars(frameIndex, updated);
+      return;
+    }
+
+    if (boxIndex > 0) {
+      focusBox(frameIndex, boxIndex - 1);
+    } else if (frameIndex > 0) {
+      const prevFrameRollCount = parsed.frames[frameIndex - 1].rolls.length;
+      focusBox(frameIndex - 1, Math.max(0, prevFrameRollCount - 1));
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -74,6 +95,7 @@ export function GameInput({ gameNumber, boxChars, onChangeBoxChars }: GameInputP
               error={frame.error}
               frameScore={frameScores[index]}
               onChangeBox={(boxIndex, char) => handleChangeBox(index, boxIndex, char)}
+              onBackspace={(boxIndex) => handleBackspace(index, boxIndex)}
               registerBoxRef={(boxIndex, el) => {
                 inputRefs.current[index] ??= [];
                 inputRefs.current[index][boxIndex] = el;
