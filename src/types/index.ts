@@ -15,4 +15,7 @@ export interface GameStats {
 
 export type GameRow = Database["public"]["Tables"]["games"]["Row"];
 export type FrameRow = Database["public"]["Tables"]["frames"]["Row"];
-export type GameWithFrames = GameRow & { frames: FrameRow[] };
+export type GameWithFrames = GameRow & {
+  frames: FrameRow[];
+  series: { bowled_at: string } | null;
+};

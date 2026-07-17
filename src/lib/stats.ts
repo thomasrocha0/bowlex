@@ -27,7 +27,7 @@ function framePinfall(rolls: number[]): number {
   return isStrike(rolls, 0) ? 10 : (rolls[0] ?? 0) + (rolls[1] ?? 0);
 }
 
-function sortedRolls(game: GameWithFrames): number[][] {
+export function sortedRolls(game: GameWithFrames): number[][] {
   return [...game.frames].sort((a, b) => a.frame_number - b.frame_number).map((frame) => frame.rolls);
 }
 

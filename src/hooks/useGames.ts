@@ -7,7 +7,7 @@ export function useGames(profileId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("games")
-        .select("*, frames(*)")
+        .select("*, frames(*), series(bowled_at)")
         .eq("profile_id", profileId)
         .order("created_at", { ascending: false });
 

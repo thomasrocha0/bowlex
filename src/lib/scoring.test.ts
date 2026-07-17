@@ -1,4 +1,4 @@
-import { calculateGameScore, validateFrame } from "./scoring";
+import { calculateFrameScores, calculateGameScore, validateFrame } from "./scoring";
 
 describe("calculateGameScore", () => {
   it("scores a gutter game as 0", () => {
@@ -125,6 +125,52 @@ describe("calculateGameScore", () => {
     ];
     // frame 1: 10 + 0 = 10, frame 2: 0 + 4 = 4
     expect(calculateGameScore(frames)).toBe(14);
+  });
+});
+
+describe("calculateFrameScores", () => {
+  it("matches calculateGameScore's total at the 10th frame for a complete game", () => {
+    const frames = [
+      [10],
+      [7, 3],
+      [9, 0],
+      [10],
+      [0, 8],
+      [8, 2],
+      [0, 6],
+      [10],
+      [10],
+      [10, 8, 1],
+    ];
+    const scores = calculateFrameScores(frames);
+    expect(scores).toHaveLength(10);
+    expect(scores.every((score) => score !== null)).toBe(true);
+    expect(scores[9]).toBe(calculateGameScore(frames));
+  });
+
+  it("returns null from a 9th-frame strike onward when the 10th frame isn't entered yet", () => {
+    const frames = [
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [10],
+      [],
+    ];
+    const scores = calculateFrameScores(frames);
+    expect(scores.slice(0, 8)).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
+    expect(scores[8]).toBeNull();
+    expect(scores[9]).toBeNull();
+  });
+
+  it("resolves every frame immediately for a game with no marks", () => {
+    const frames = Array.from({ length: 10 }, () => [5, 4]);
+    const scores = calculateFrameScores(frames);
+    expect(scores).toEqual([9, 18, 27, 36, 45, 54, 63, 72, 81, 90]);
   });
 });
 

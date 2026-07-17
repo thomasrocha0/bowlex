@@ -36,6 +36,49 @@ export function calculateGameScore(frames: number[][]): number {
   return score;
 }
 
+/**
+ * Cumulative score after each frame, for scoring a game that isn't
+ * necessarily complete yet (e.g. mid-entry in the "Add Games" modal).
+ * Frames are only scored while every roll their lookahead needs is already
+ * present in `frames`; the first frame whose bonus rolls aren't fully
+ * available yet -- and every frame after it -- is `null`, since a running
+ * total can't continue past an unresolved gap. Pass `[]` for any frame not
+ * yet complete (this is exactly the shape `parseGameInput` produces).
+ */
+export function calculateFrameScores(frames: number[][]): (number | null)[] {
+  const scores: (number | null)[] = new Array(FRAMES_PER_GAME).fill(null);
+
+  const firstEmptyIndex = frames.findIndex((rolls) => rolls.length === 0);
+  const resolvedFrameCount = firstEmptyIndex === -1 ? frames.length : firstEmptyIndex;
+  const rolls = frames.slice(0, resolvedFrameCount).flat();
+
+  let score = 0;
+  let rollIndex = 0;
+
+  for (let frame = 0; frame < resolvedFrameCount; frame++) {
+    let frameScore: number;
+
+    if (isStrike(rolls, rollIndex)) {
+      if (rollIndex + 2 >= rolls.length) break;
+      frameScore = PINS + rolls[rollIndex + 1] + rolls[rollIndex + 2];
+      rollIndex += 1;
+    } else if (isSpare(rolls, rollIndex)) {
+      if (rollIndex + 2 >= rolls.length) break;
+      frameScore = PINS + rolls[rollIndex + 2];
+      rollIndex += 2;
+    } else {
+      if (rollIndex + 1 >= rolls.length) break;
+      frameScore = rolls[rollIndex] + rolls[rollIndex + 1];
+      rollIndex += 2;
+    }
+
+    score += frameScore;
+    scores[frame] = score;
+  }
+
+  return scores;
+}
+
 export interface FrameValidationResult {
   valid: boolean;
   error?: string;
