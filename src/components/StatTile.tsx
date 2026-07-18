@@ -14,7 +14,7 @@ export function StatTile({ value, label }: StatTileProps) {
       <Text style={styles.value} numberOfLines={1}>
         {value}
       </Text>
-      <Text style={styles.label} numberOfLines={2}>
+      <Text style={styles.label} numberOfLines={1}>
         {label}
       </Text>
     </View>
@@ -24,27 +24,28 @@ export function StatTile({ value, label }: StatTileProps) {
 const styles = StyleSheet.create({
   container: {
     alignSelf: "flex-start",
-    alignItems: "center",
     backgroundColor: statTileColors.background,
     borderColor: statTileColors.border,
     borderWidth: 1,
     borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
     gap: 4,
+    width: 120
   },
   value: {
     minWidth: 80,
     fontSize: 28,
     fontWeight: "700",
     color: statTileColors.value,
-    textAlign: "center",
+    textAlign: "left",
   },
   label: {
+    alignSelf: "flex-end",
     maxWidth: 180,
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: "300",
     color: statTileColors.label,
-    textAlign: "center",
+    paddingHorizontal: 8,
   },
 });

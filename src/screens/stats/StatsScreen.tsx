@@ -27,25 +27,27 @@ export function StatsScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={[scrollStyles.scroll, styles.tileScroll]}
-        contentContainerStyle={scrollStyles.content}
-      >
-        <StatTile label="Average Score" value={stats.averageScore.toFixed(1)} />
-        <StatTile label="High Score" value={String(stats.highGame)} />
-        <StatTile label="Average Pins" value={stats.averagePins.toFixed(1)} />
-        <StatTile label="Strike Rate" value={`${stats.strikePercentage.toFixed(1)}%`} />
-        <StatTile label="Spare Rate" value={`${stats.sparePercentage.toFixed(1)}%`} />
-        <StatTile label="Open Frame Rate" value={`${stats.openFramePercentage.toFixed(1)}%`} />
-      </ScrollView>
+      <StatTile label="Average Score" value={stats.averageScore.toFixed(1)} />
+      <StatTile label="High Score" value={String(stats.highGame)} />
+      <StatTile label="Average Pins" value={stats.averagePins.toFixed(1)} />
+      <StatTile label="Strike Rate" value={`${stats.strikePercentage.toFixed(1)}%`} />
+      <StatTile label="Spare Rate" value={`${stats.sparePercentage.toFixed(1)}%`} />
+      <StatTile label="Open Frame Rate" value={`${stats.openFramePercentage.toFixed(1)}%`} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: Palette["grey-50"] },
+  container: { 
+    flex: 1, 
+    flexDirection: "row",
+    alignItems: "center", 
+    justifyContent: "center", 
+    backgroundColor: Palette["grey-50"],
+    flexWrap: "wrap",
+    gap: 10,
+    paddingVertical: 20
+  },
   title: { fontSize: 20, fontWeight: "600" },
   tileScroll: {
     marginTop: 20,
