@@ -27,12 +27,14 @@ export function StatsScreen() {
 
   return (
     <View style={styles.container}>
-      <StatTile label="Average Score" value={stats.averageScore.toFixed(1)} />
-      <StatTile label="High Score" value={String(stats.highGame)} />
-      <StatTile label="Average Pins" value={stats.averagePins.toFixed(1)} />
-      <StatTile label="Strike Rate" value={`${stats.strikePercentage.toFixed(1)}%`} />
-      <StatTile label="Spare Rate" value={`${stats.sparePercentage.toFixed(1)}%`} />
-      <StatTile label="Open Frame Rate" value={`${stats.openFramePercentage.toFixed(1)}%`} />
+      <View style={styles.tileContainer}>
+        <StatTile label="Average Score" value={stats.averageScore.toFixed(1)} />
+        <StatTile label="High Score" value={String(stats.highGame)} />
+        <StatTile label="Average Pins" value={stats.averagePins.toFixed(1)} />
+        <StatTile label="Strike Rate" value={`${stats.strikePercentage.toFixed(1)}%`} />
+        <StatTile label="Spare Rate" value={`${stats.sparePercentage.toFixed(1)}%`} />
+        <StatTile label="Open Frame Rate" value={`${stats.openFramePercentage.toFixed(1)}%`} />
+      </View>
     </View>
   );
 }
@@ -40,13 +42,19 @@ export function StatsScreen() {
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    flexDirection: "row",
-    alignItems: "center", 
-    justifyContent: "center", 
+    flexDirection: "column",
+    justifyContent: "flex-start", 
     backgroundColor: Palette["grey-50"],
     flexWrap: "wrap",
     gap: 10,
     paddingVertical: 20
+  },
+  tileContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 10,
+    paddingVertical: 20,
   },
   title: { fontSize: 20, fontWeight: "600" },
   tileScroll: {

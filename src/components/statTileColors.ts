@@ -1,7 +1,7 @@
 import { Palette } from "./Palette";
 export const statTileColors = {
-  value: Palette["red-500"],
+  value: Palette["blue-600"],
   label: Palette["grey-500"],
-  background: Palette["grey-100"],
-  border: Palette["grey-500"],
+  background: Palette["grey-50"],
+  border: Palette["red-500"],
 };

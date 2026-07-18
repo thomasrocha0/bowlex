@@ -1,5 +1,6 @@
 export const Palette = {
   "red-500": "#dc2626",
+  "red-500-o": "#dc2626be",
   "blue-600": "#2563eb",
   "grey-25": "#fcfbfb",
   "grey-50": "#f7f6f6",
