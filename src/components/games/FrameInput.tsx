@@ -3,17 +3,22 @@ import { FRAME_BOX_CHAR_PATTERN, type FrameInputStatus } from "../../lib/frameNo
 import { frameColors } from "./frameColors";
 
 
+/** Everything GameInput already derives from parseFrameInput for one frame, bundled to keep FrameInputProps short. */
+export interface FrameInputSummary {
+  status: FrameInputStatus;
+  expectedBoxCount: number;
+  /** `rolls.length` from the matching parseFrameInput result. */
+  filledBoxCount: number;
+  error?: string;
+  frameScore?: number | null;
+}
+
 interface FrameInputProps {
   frameNumber: number;
   scale: number;
   /** Raw characters typed so far, padded to at least `expectedBoxCount`. */
   boxes: string[];
-  expectedBoxCount: number;
-  /** `rolls.length` from the matching parseFrameInput result. */
-  filledBoxCount: number;
-  status: FrameInputStatus;
-  error?: string;
-  frameScore?: number | null;
+  frame: FrameInputSummary;
   onChangeBox: (boxIndex: number, char: string) => void;
   /** Fired on a Backspace keypress (web/iOS only -- see GameInput), even when the box is already empty. */
   onBackspace: (boxIndex: number) => void;
@@ -33,16 +38,13 @@ export function FrameInput({
   frameNumber,
   scale,
   boxes,
-  expectedBoxCount,
-  filledBoxCount,
-  status,
-  error,
-  frameScore,
+  frame,
   onChangeBox,
   onBackspace,
   registerBoxRef,
   disabled,
 }: FrameInputProps) {
+  const { status, expectedBoxCount, filledBoxCount, error, frameScore } = frame;
   const sizeStyle = {
     boxSize: 30 * scale,
     fontSize: 15 * scale,
@@ -112,15 +114,18 @@ export function FrameInput({
 }
 
 const styles = StyleSheet.create({
-  container: { alignItems: "center", gap: 2 },
+  container: { 
+    alignItems: "center", 
+    gap: 2,
+    borderWidth: 1,
+    borderColor: frameColors.border,
+    padding: 2,
+    borderRadius: 4,
+  },
   frameNumber: { fontSize: 10, color: frameColors.text },
   boxesRow: { 
     flexDirection: "row", 
     gap: 2,
-    borderTopColor: frameColors.border,
-    borderTopWidth: 1,
-    borderBottomColor: frameColors.border,
-    borderBottomWidth: 1,
   },
   box: {
     borderWidth: 1,

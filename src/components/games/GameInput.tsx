@@ -89,11 +89,13 @@ export function GameInput({ gameNumber, boxChars, onChangeBoxChars }: GameInputP
               frameNumber={index + 1}
               scale={0.8}
               boxes={boxChars[index]}
-              expectedBoxCount={frame.expectedBoxCount}
-              filledBoxCount={frame.rolls.length}
-              status={frame.status}
-              error={frame.error}
-              frameScore={frameScores[index]}
+              frame={{
+                status: frame.status,
+                expectedBoxCount: frame.expectedBoxCount,
+                filledBoxCount: frame.rolls.length,
+                error: frame.error,
+                frameScore: frameScores[index],
+              }}
               onChangeBox={(boxIndex, char) => handleChangeBox(index, boxIndex, char)}
               onBackspace={(boxIndex) => handleBackspace(index, boxIndex)}
               registerBoxRef={(boxIndex, el) => {
