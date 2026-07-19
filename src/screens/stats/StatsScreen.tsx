@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
 import { StatTile } from "../../components/StatTile";
+import { ScoreHistoryChart } from "../../components/stats/ScoreHistoryChart";
 import { Palette } from "../../components/Palette"
 import { createHorizontalScrollStyles } from "../../components/horizontalScrollStyles";
 import { useSession } from "../../hooks/useSession";
@@ -35,6 +36,10 @@ export function StatsScreen() {
         <StatTile label="Spare Rate" value={`${stats.sparePercentage.toFixed(1)}%`} />
         <StatTile label="Open Frame Rate" value={`${stats.openFramePercentage.toFixed(1)}%`} />
       </View>
+
+      <View style={styles.chartContainer}>
+        <ScoreHistoryChart games={games} />
+      </View>
     </View>
   );
 }
@@ -55,6 +60,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 10,
     paddingVertical: 20,
+  },
+  chartContainer: {
+    alignItems: "center",
+    paddingHorizontal: 10,
   },
   title: { fontSize: 20, fontWeight: "600" },
   tileScroll: {

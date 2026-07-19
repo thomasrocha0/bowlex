@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     backgroundColor: statTileColors.background,
     borderColor: statTileColors.border,
-    borderWidth: 1,
+    borderWidth: 2,
     borderRadius: 12,
     paddingVertical: 8,
     paddingHorizontal: 8,
