@@ -12,9 +12,11 @@ interface CreateSeriesWithGamesInput {
 
 /**
  * Calls the `create_series_with_games` Postgres function, which inserts the
- * series, every game, and every frame in a single transaction (see the
- * "Core Logic Notes" section of CLAUDE.md -- frame validity is client-side
- * only, so this only needs to guard structural shape, not bowling rules).
+ * series, every game, and every frame in a single transaction. The UI
+ * validates frames before submit (see "Core Logic Notes" in CLAUDE.md), and
+ * the server independently re-validates every roll against the same bowling
+ * rules (see 20260718090000_add_frame_roll_validation.sql) -- both layers
+ * matter, since this call is reachable directly, not just through the UI.
  */
 export function useCreateSeriesWithGames() {
   const queryClient = useQueryClient();
