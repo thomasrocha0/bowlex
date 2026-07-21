@@ -28,6 +28,7 @@ export function SearchBar({ value, onChangeText, placeholder, onSubmit }: Search
 
 const styles = StyleSheet.create({
   input: {
+    width: 200,
     borderWidth: 1,
     borderColor: searchBarColors.border,
     borderRadius: 8,

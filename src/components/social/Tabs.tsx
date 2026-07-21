@@ -36,6 +36,12 @@ export function Tabs<T extends string>({ options, value, onChange }: TabsProps<T
 
 const styles = StyleSheet.create({
   container: { flexDirection: "row", gap: 8 },
-  tab: { borderRadius: 8, paddingVertical: 6, paddingHorizontal: 12 },
+  tab: { 
+    borderRadius: 8, 
+    paddingVertical: 6, 
+    paddingHorizontal: 12, 
+    height: 36,
+    justifyContent: "center"
+  },
   label: { fontSize: 13, fontWeight: "700" },
 });

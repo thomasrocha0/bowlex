@@ -1,8 +1,18 @@
 import { useMemo, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { Palette } from "../../components/Palette";
-import { FriendsTable, type FriendsTableMode, type FriendsTableRow } from "../../components/social/FriendsTable";
-import { friendsTableColors } from "../../components/social/friendsTableColors"; 
+import {
+  FriendsTable,
+  type FriendsTableMode,
+  type FriendsTableRow,
+} from "../../components/social/FriendsTable";
+import { friendsTableColors } from "../../components/social/friendsTableColors";
 import { ManageFriendModal } from "../../components/social/ManageFriendModal";
 import { SearchBar } from "../../components/social/SearchBar";
 import { Tabs } from "../../components/social/Tabs";
@@ -16,7 +26,6 @@ import { getOtherProfile, getRelationshipStatus } from "../../lib/friendships";
 import type { BlockWithProfile, FriendshipRow } from "../../types";
 
 type MainTab = "friends" | "pending" | "blocked";
-type PendingSubTab = "incoming" | "outgoing";
 
 const MAIN_TABS: { value: MainTab; label: string }[] = [
   { value: "friends", label: "Friends" },
@@ -24,22 +33,35 @@ const MAIN_TABS: { value: MainTab; label: string }[] = [
   { value: "blocked", label: "Blocked" },
 ];
 
-const PENDING_SUB_TABS: { value: PendingSubTab; label: string }[] = [
-  { value: "incoming", label: "Incoming" },
-  { value: "outgoing", label: "Outgoing" },
-];
-
-function toRows(friendships: FriendshipRow[], myProfileId: string, relationship: (id: string) => FriendsTableRow["relationship"]) {
-  return friendships.map((f) => ({ profile: getOtherProfile(f, myProfileId), relationship: relationship(f.id) }));
+function toRows(
+  friendships: FriendshipRow[],
+  myProfileId: string,
+  relationship: (id: string) => FriendsTableRow["relationship"],
+) {
+  return friendships.map((f) => ({
+    profile: getOtherProfile(f, myProfileId),
+    relationship: relationship(f.id),
+  }));
 }
 
 /** Blocks aren't symmetric like a friendship row, so this maps off the joined `blocked` profile instead of getOtherProfile. */
 function toBlockedRows(blocks: BlockWithProfile[]): FriendsTableRow[] {
-  return blocks.flatMap((b) => (b.blocked ? [{ profile: b.blocked, relationship: { type: "blocked" as const, blockId: b.id } }] : []));
+  return blocks.flatMap((b) =>
+    b.blocked
+      ? [
+          {
+            profile: b.blocked,
+            relationship: { type: "blocked" as const, blockId: b.id },
+          },
+        ]
+      : [],
+  );
 }
 
 function matchesFilter(row: FriendsTableRow, filter: string) {
-  return row.profile.username.toLowerCase().includes(filter.trim().toLowerCase());
+  return row.profile.username
+    .toLowerCase()
+    .includes(filter.trim().toLowerCase());
 }
 
 export function FriendsScreen() {
@@ -47,7 +69,6 @@ export function FriendsScreen() {
   const profileId = session?.user.id ?? "";
 
   const [mainTab, setMainTab] = useState<MainTab>("friends");
-  const [pendingSubTab, setPendingSubTab] = useState<PendingSubTab>("incoming");
   const [tableFilter, setTableFilter] = useState("");
   const [globalSearch, setGlobalSearch] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,37 +89,90 @@ export function FriendsScreen() {
       outgoing: outgoing.data ?? [],
       blocked: blocked.data ?? [],
     }),
-    [friends.data, incoming.data, outgoing.data, blocked.data]
+    [friends.data, incoming.data, outgoing.data, blocked.data],
   );
 
   const searchRows: FriendsTableRow[] = useMemo(
-    () => (search.data ?? []).map((profile) => ({ profile, relationship: getRelationshipStatus(profile.id, relationshipLists) })),
-    [search.data, relationshipLists]
+    () =>
+      (search.data ?? []).map((profile) => ({
+        profile,
+        relationship: getRelationshipStatus(profile.id, relationshipLists),
+      })),
+    [search.data, relationshipLists],
   );
 
-  const { mode, rows, isLoading }: { mode: FriendsTableMode; rows: FriendsTableRow[]; isLoading: boolean } = useMemo(() => {
+  const { rows, mode, isLoading } = useMemo(() => {
     if (mainTab === "friends") {
-      const friendRows = toRows(relationshipLists.friends, profileId, (friendshipId) => ({ type: "friend", friendshipId }));
-      return { mode: "friends", rows: friendRows.filter((r) => matchesFilter(r, tableFilter)), isLoading: friends.isLoading };
+      const friendRows = toRows(
+        relationshipLists.friends,
+        profileId,
+        (friendshipId) => ({ type: "friend", friendshipId }),
+      );
+      return {
+        rows: friendRows.filter((r) => matchesFilter(r, tableFilter)),
+        mode: "friends" as FriendsTableMode,
+        isLoading: friends.isLoading,
+      };
     }
 
     if (mainTab === "blocked") {
       const blockedRows = toBlockedRows(relationshipLists.blocked);
-      return { mode: "blocked", rows: blockedRows.filter((r) => matchesFilter(r, tableFilter)), isLoading: blocked.isLoading };
+      return {
+        rows: blockedRows.filter((r) => matchesFilter(r, tableFilter)),
+        mode: "blocked" as FriendsTableMode,
+        isLoading: blocked.isLoading,
+      };
     }
 
-    if (pendingSubTab === "incoming") {
-      const incomingRows = toRows(relationshipLists.incoming, profileId, (friendshipId) => ({ type: "incomingPending", friendshipId }));
-      return { mode: "pendingIncoming", rows: incomingRows.filter((r) => matchesFilter(r, tableFilter)), isLoading: incoming.isLoading };
-    }
+    return {
+      rows: [],
+      mode: "pendingIncoming" as FriendsTableMode,
+      isLoading: incoming.isLoading || outgoing.isLoading,
+    };
+  }, [
+    mainTab,
+    relationshipLists,
+    profileId,
+    tableFilter,
+    friends.isLoading,
+    blocked.isLoading,
+    incoming.isLoading,
+    outgoing.isLoading,
+  ]);
 
-    const outgoingRows = toRows(relationshipLists.outgoing, profileId, (friendshipId) => ({ type: "outgoingPending", friendshipId }));
-    return { mode: "pendingOutgoing", rows: outgoingRows.filter((r) => matchesFilter(r, tableFilter)), isLoading: outgoing.isLoading };
-  }, [mainTab, pendingSubTab, relationshipLists, profileId, tableFilter, friends.isLoading, blocked.isLoading, incoming.isLoading, outgoing.isLoading]);
+  const pendingRows = useMemo(() => {
+    const incomingRows = toRows(
+      relationshipLists.incoming,
+      profileId,
+      (friendshipId) => ({ type: "incomingPending", friendshipId }),
+    );
+    const outgoingRows = toRows(
+      relationshipLists.outgoing,
+      profileId,
+      (friendshipId) => ({ type: "outgoingPending", friendshipId }),
+    );
+
+    return {
+      incoming: incomingRows.filter((r) => matchesFilter(r, tableFilter)),
+      outgoing: outgoingRows.filter((r) => matchesFilter(r, tableFilter)),
+    };
+  }, [
+    relationshipLists.incoming,
+    relationshipLists.outgoing,
+    profileId,
+    tableFilter,
+  ]);
 
   return (
-    <View style={styles.container}>
+    // Tapping anywhere outside the search bar/dropdown dismisses it -- nested
+    // Touchables (rows, tabs, buttons) claim the touch for themselves via
+    // RN's responder system, so this only fires for taps that land on empty
+    // space. Deliberately not blur-based: submitting via the keyboard's
+    // return key also blurs the input on most platforms, which made the
+    // dropdown flash open and immediately close again.
+    <Pressable style={styles.container} onPress={() => setSearchQuery("")}>
       <View style={styles.searchWrapper}>
+        <Text style={styles.tableTitle}>Find Users</Text>
         <SearchBar
           value={globalSearch}
           onChangeText={setGlobalSearch}
@@ -109,9 +183,16 @@ export function FriendsScreen() {
         {showSearchResults && (
           <View style={styles.searchOverlay}>
             {search.isLoading ? (
-              <ActivityIndicator style={styles.loading} color={Palette["grey-500"]} />
+              <ActivityIndicator
+                style={styles.loading}
+                color={Palette["grey-500"]}
+              />
             ) : (
-              <FriendsTable rows={searchRows} mode="search" onSelectRow={setSelectedRow} />
+              <FriendsTable
+                rows={searchRows}
+                mode="search"
+                onSelectRow={setSelectedRow}
+              />
             )}
           </View>
         )}
@@ -120,12 +201,49 @@ export function FriendsScreen() {
       <View style={styles.tabsRow}>
         <View style={styles.tabsColumn}>
           <Tabs options={MAIN_TABS} value={mainTab} onChange={setMainTab} />
-          {mainTab === "pending" && <Tabs options={PENDING_SUB_TABS} value={pendingSubTab} onChange={setPendingSubTab} />}
         </View>
-        <SearchBar value={tableFilter} onChangeText={setTableFilter} placeholder="Filter..." />
+        <SearchBar
+          value={tableFilter}
+          onChangeText={setTableFilter}
+          placeholder="Filter..."
+        />
       </View>
 
-      {isLoading ? (
+      {mainTab === "pending" ? (
+        <View style={styles.pendingTables}>
+          <View style={styles.tableSection}>
+            <Text style={styles.tableTitle}>Incoming Requests</Text>
+            {incoming.isLoading ? (
+              <ActivityIndicator
+                style={styles.loading}
+                color={Palette["grey-500"]}
+              />
+            ) : (
+              <FriendsTable
+                rows={pendingRows.incoming}
+                mode="pendingIncoming"
+                onSelectRow={setSelectedRow}
+              />
+            )}
+          </View>
+
+          <View style={styles.tableSection}>
+            <Text style={styles.tableTitle}>Outgoing Requests</Text>
+            {outgoing.isLoading ? (
+              <ActivityIndicator
+                style={styles.loading}
+                color={Palette["grey-500"]}
+              />
+            ) : (
+              <FriendsTable
+                rows={pendingRows.outgoing}
+                mode="pendingOutgoing"
+                onSelectRow={setSelectedRow}
+              />
+            )}
+          </View>
+        </View>
+      ) : isLoading ? (
         <ActivityIndicator style={styles.loading} color={Palette["grey-500"]} />
       ) : (
         <FriendsTable rows={rows} mode={mode} onSelectRow={setSelectedRow} />
@@ -138,13 +256,23 @@ export function FriendsScreen() {
         relationship={selectedRow?.relationship ?? { type: "none" }}
         myProfileId={profileId}
       />
-    </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Palette["grey-50"], padding: 16, gap: 12 },
-  searchWrapper: { zIndex: 20 },
+  container: {
+    flex: 1,
+    backgroundColor: Palette["grey-50"],
+    padding: 16,
+    gap: 12,
+  },
+  searchWrapper: { 
+    zIndex: 20, 
+    flexDirection: "row" , 
+    gap: 12, 
+    alignItems: "center" 
+  },
   searchOverlay: {
     position: "absolute",
     top: "100%",
@@ -163,7 +291,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 6,
   },
-  tabsRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 12 },
+  tabsRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
+  },
   tabsColumn: { gap: 8 },
+  pendingTables: { flex: 1, gap: 12 },
+  tableSection: { flex: 1, gap: 8, minHeight: 0 },
+  tableTitle: { fontSize: 14, fontWeight: "700", color: Palette["grey-700"] },
   loading: { marginTop: 32 },
 });
