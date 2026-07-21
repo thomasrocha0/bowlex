@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
 import { StatTile } from "../../components/StatTile";
 import { ScoreHistoryChart } from "../../components/stats/ScoreHistoryChart";
@@ -8,6 +8,7 @@ import { useSession } from "../../hooks/auth/useSession";
 import { useGames } from "../../hooks/games/useGames";
 import { useGamesStore } from "../../store/useGamesStore";
 import { calculateStats } from "../../lib/stats";
+import { filterGamesByTimeframe, type ScoreHistoryTimeframe } from "../../lib/scoreHistory";
 
 const TILE_GAP = Dimensions.get("window").width * 0.05;
 const scrollStyles = createHorizontalScrollStyles(TILE_GAP);
@@ -24,7 +25,8 @@ export function StatsScreen() {
     if (fetchedGames) setGames(fetchedGames);
   }, [fetchedGames, setGames]);
 
-  const stats = calculateStats(games);
+  const [timeframe, setTimeframe] = useState<ScoreHistoryTimeframe>("last10");
+  const stats = calculateStats(filterGamesByTimeframe(games, timeframe));
 
   return (
     <View style={styles.container}>
@@ -38,7 +40,7 @@ export function StatsScreen() {
       </View>
 
       <View style={styles.chartContainer}>
-        <ScoreHistoryChart games={games} />
+        <ScoreHistoryChart games={games} timeframe={timeframe} onTimeframeChange={setTimeframe} />
       </View>
     </View>
   );

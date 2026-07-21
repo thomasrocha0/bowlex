@@ -53,39 +53,45 @@ export function getScoreHistoryTimeDomain(
 }
 
 /**
- * Score-over-time series for the chart, oldest first. Only complete games
- * carry a real score (mirrors calculateStats' "10 frames or it didn't
- * happen" rule), and the timeframe filter is applied after sorting so
- * last10/last30 always keep the most recent games rather than an arbitrary
- * slice.
+ * Games within a timeframe, oldest first. Only complete games count (mirrors
+ * calculateStats' "10 frames or it didn't happen" rule), and the timeframe
+ * filter is applied after sorting so last10/last30 always keep the most
+ * recent games rather than an arbitrary slice. Shared by the score history
+ * chart and the stat tiles so both agree on what's in a given timeframe.
  */
+export function filterGamesByTimeframe(
+  games: GameWithFrames[],
+  timeframe: ScoreHistoryTimeframe,
+  now: Date = new Date()
+): GameWithFrames[] {
+  const complete = games.filter((game) => game.frames.length === 10).sort((a, b) => bowledAt(a).localeCompare(bowledAt(b)));
+
+  switch (timeframe) {
+    case "last10":
+      return complete.slice(-10);
+    case "last30":
+      return complete.slice(-30);
+    case "lastMonth":
+    case "lastYear": {
+      const { start } = getScoreHistoryTimeDomain(timeframe, now)!;
+      return complete.filter((game) => new Date(bowledAt(game)) >= start);
+    }
+    case "lifetime":
+      return complete;
+  }
+}
+
+/** Score-over-time series for the chart, oldest first. */
 export function buildScoreHistory(
   games: GameWithFrames[],
   timeframe: ScoreHistoryTimeframe,
   now: Date = new Date()
 ): ScoreHistoryPoint[] {
-  const points = games
-    .filter((game) => game.frames.length === 10)
-    .map((game) => ({
-      gameId: game.id,
-      date: bowledAt(game),
-      score: calculateGameScore(sortedRolls(game)),
-    }))
-    .sort((a, b) => a.date.localeCompare(b.date));
-
-  switch (timeframe) {
-    case "last10":
-      return points.slice(-10);
-    case "last30":
-      return points.slice(-30);
-    case "lastMonth":
-    case "lastYear": {
-      const { start } = getScoreHistoryTimeDomain(timeframe, now)!;
-      return points.filter((point) => new Date(point.date) >= start);
-    }
-    case "lifetime":
-      return points;
-  }
+  return filterGamesByTimeframe(games, timeframe, now).map((game) => ({
+    gameId: game.id,
+    date: bowledAt(game),
+    score: calculateGameScore(sortedRolls(game)),
+  }));
 }
 
 /**

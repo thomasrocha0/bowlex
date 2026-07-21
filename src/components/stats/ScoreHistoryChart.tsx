@@ -13,6 +13,8 @@ import { TimeframeSelect } from "./TimeframeSelect";
 
 interface ScoreHistoryChartProps {
   games: GameWithFrames[];
+  timeframe: ScoreHistoryTimeframe;
+  onTimeframeChange: (timeframe: ScoreHistoryTimeframe) => void;
 }
 
 const MIN_CHART_WIDTH = 220;
@@ -37,9 +39,8 @@ function guideValues(maxScore: number): [number[], number] {
   return [values, yMax];
 }
 
-export function ScoreHistoryChart({ games }: ScoreHistoryChartProps) {
+export function ScoreHistoryChart({ games, timeframe, onTimeframeChange }: ScoreHistoryChartProps) {
   const { width: windowWidth } = useWindowDimensions();
-  const [timeframe, setTimeframe] = useState<ScoreHistoryTimeframe>("last10");
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [pinnedIndex, setPinnedIndex] = useState<number | null>(null);
 
@@ -73,7 +74,7 @@ export function ScoreHistoryChart({ games }: ScoreHistoryChartProps) {
   const yFor = (score: number) => CHART_PADDING.top + INNER_HEIGHT - (score / yMax) * INNER_HEIGHT;
 
   const handleTimeframeChange = (next: ScoreHistoryTimeframe) => {
-    setTimeframe(next);
+    onTimeframeChange(next);
     setHoveredIndex(null);
     setPinnedIndex(null);
   };
