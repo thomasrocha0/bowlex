@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   Pressable,
   StyleSheet,
   Text,
@@ -182,18 +181,7 @@ export function FriendsScreen() {
 
         {showSearchResults && (
           <View style={styles.searchOverlay}>
-            {search.isLoading ? (
-              <ActivityIndicator
-                style={styles.loading}
-                color={Palette["grey-500"]}
-              />
-            ) : (
-              <FriendsTable
-                rows={searchRows}
-                mode="search"
-                onSelectRow={setSelectedRow}
-              />
-            )}
+            <FriendsTable rows={searchRows} mode="search" onSelectRow={setSelectedRow} isLoading={search.isLoading} />
           </View>
         )}
       </View>
@@ -213,40 +201,26 @@ export function FriendsScreen() {
         <View style={styles.pendingTables}>
           <View style={styles.tableSection}>
             <Text style={styles.tableTitle}>Incoming Requests</Text>
-            {incoming.isLoading ? (
-              <ActivityIndicator
-                style={styles.loading}
-                color={Palette["grey-500"]}
-              />
-            ) : (
-              <FriendsTable
-                rows={pendingRows.incoming}
-                mode="pendingIncoming"
-                onSelectRow={setSelectedRow}
-              />
-            )}
+            <FriendsTable
+              rows={pendingRows.incoming}
+              mode="pendingIncoming"
+              onSelectRow={setSelectedRow}
+              isLoading={incoming.isLoading}
+            />
           </View>
 
           <View style={styles.tableSection}>
             <Text style={styles.tableTitle}>Outgoing Requests</Text>
-            {outgoing.isLoading ? (
-              <ActivityIndicator
-                style={styles.loading}
-                color={Palette["grey-500"]}
-              />
-            ) : (
-              <FriendsTable
-                rows={pendingRows.outgoing}
-                mode="pendingOutgoing"
-                onSelectRow={setSelectedRow}
-              />
-            )}
+            <FriendsTable
+              rows={pendingRows.outgoing}
+              mode="pendingOutgoing"
+              onSelectRow={setSelectedRow}
+              isLoading={outgoing.isLoading}
+            />
           </View>
         </View>
-      ) : isLoading ? (
-        <ActivityIndicator style={styles.loading} color={Palette["grey-500"]} />
       ) : (
-        <FriendsTable rows={rows} mode={mode} onSelectRow={setSelectedRow} />
+        <FriendsTable rows={rows} mode={mode} onSelectRow={setSelectedRow} isLoading={isLoading} />
       )}
 
       <ManageFriendModal
@@ -301,5 +275,4 @@ const styles = StyleSheet.create({
   pendingTables: { flex: 1, gap: 12 },
   tableSection: { flex: 1, gap: 8, minHeight: 0 },
   tableTitle: { fontSize: 14, fontWeight: "700", color: Palette["grey-700"] },
-  loading: { marginTop: 32 },
 });
