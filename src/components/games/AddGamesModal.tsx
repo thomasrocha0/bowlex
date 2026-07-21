@@ -4,7 +4,7 @@ import { Button } from "../Button";
 import { Modal } from "../Modal";
 import { parseGameInput } from "../../lib/frameNotation";
 import { DEFAULT_GAME_COUNT, MAX_GAMES_PER_SERIES } from "../../lib/gamesConfig";
-import { useCreateSeriesWithGames } from "../../hooks/useCreateSeriesWithGames";
+import { useCreateSeriesWithGames } from "../../hooks/games/useCreateSeriesWithGames";
 import { addGamesModalColors } from "./addGamesModalColors";
 import { GameInput } from "./GameInput";
 

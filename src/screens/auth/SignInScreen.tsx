@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useSignIn } from "../../hooks/useSignIn";
+import { useSignIn } from "../../hooks/auth/useSignIn";
 import { getAuthErrorMessage } from "../../lib/auth";
 import type { RootStackParamList } from "../../navigation/types";
 

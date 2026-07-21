@@ -4,8 +4,8 @@ import { StatTile } from "../../components/StatTile";
 import { ScoreHistoryChart } from "../../components/stats/ScoreHistoryChart";
 import { Palette } from "../../components/Palette"
 import { createHorizontalScrollStyles } from "../../components/horizontalScrollStyles";
-import { useSession } from "../../hooks/useSession";
-import { useGames } from "../../hooks/useGames";
+import { useSession } from "../../hooks/auth/useSession";
+import { useGames } from "../../hooks/games/useGames";
 import { useGamesStore } from "../../store/useGamesStore";
 import { calculateStats } from "../../lib/stats";
 

@@ -1,14 +1,169 @@
-import { StyleSheet, Text, View } from "react-native";
+import { useMemo, useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { Palette } from "../../components/Palette";
+import { FriendsTable, type FriendsTableMode, type FriendsTableRow } from "../../components/social/FriendsTable";
+import { friendsTableColors } from "../../components/social/friendsTableColors"; 
+import { ManageFriendModal } from "../../components/social/ManageFriendModal";
+import { SearchBar } from "../../components/social/SearchBar";
+import { Tabs } from "../../components/social/Tabs";
+import { useBlockedUsers } from "../../hooks/blocks/useBlockedUsers";
+import { useFriendRequests } from "../../hooks/friendships/useFriendRequests";
+import { useFriends } from "../../hooks/friendships/useFriends";
+import { useOutgoingFriendRequests } from "../../hooks/friendships/useOutgoingFriendRequests";
+import { useSearchUsers } from "../../hooks/profiles/useSearchUsers";
+import { useSession } from "../../hooks/auth/useSession";
+import { getOtherProfile, getRelationshipStatus } from "../../lib/friendships";
+import type { BlockWithProfile, FriendshipRow } from "../../types";
+
+type MainTab = "friends" | "pending" | "blocked";
+type PendingSubTab = "incoming" | "outgoing";
+
+const MAIN_TABS: { value: MainTab; label: string }[] = [
+  { value: "friends", label: "Friends" },
+  { value: "pending", label: "Pending" },
+  { value: "blocked", label: "Blocked" },
+];
+
+const PENDING_SUB_TABS: { value: PendingSubTab; label: string }[] = [
+  { value: "incoming", label: "Incoming" },
+  { value: "outgoing", label: "Outgoing" },
+];
+
+function toRows(friendships: FriendshipRow[], myProfileId: string, relationship: (id: string) => FriendsTableRow["relationship"]) {
+  return friendships.map((f) => ({ profile: getOtherProfile(f, myProfileId), relationship: relationship(f.id) }));
+}
+
+/** Blocks aren't symmetric like a friendship row, so this maps off the joined `blocked` profile instead of getOtherProfile. */
+function toBlockedRows(blocks: BlockWithProfile[]): FriendsTableRow[] {
+  return blocks.flatMap((b) => (b.blocked ? [{ profile: b.blocked, relationship: { type: "blocked" as const, blockId: b.id } }] : []));
+}
+
+function matchesFilter(row: FriendsTableRow, filter: string) {
+  return row.profile.username.toLowerCase().includes(filter.trim().toLowerCase());
+}
 
 export function FriendsScreen() {
+  const { session } = useSession();
+  const profileId = session?.user.id ?? "";
+
+  const [mainTab, setMainTab] = useState<MainTab>("friends");
+  const [pendingSubTab, setPendingSubTab] = useState<PendingSubTab>("incoming");
+  const [tableFilter, setTableFilter] = useState("");
+  const [globalSearch, setGlobalSearch] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedRow, setSelectedRow] = useState<FriendsTableRow | null>(null);
+
+  const friends = useFriends(profileId);
+  const incoming = useFriendRequests(profileId);
+  const outgoing = useOutgoingFriendRequests(profileId);
+  const blocked = useBlockedUsers(profileId);
+  const search = useSearchUsers(searchQuery, profileId);
+
+  const showSearchResults = searchQuery.trim().length > 0;
+
+  const relationshipLists = useMemo(
+    () => ({
+      friends: friends.data ?? [],
+      incoming: incoming.data ?? [],
+      outgoing: outgoing.data ?? [],
+      blocked: blocked.data ?? [],
+    }),
+    [friends.data, incoming.data, outgoing.data, blocked.data]
+  );
+
+  const searchRows: FriendsTableRow[] = useMemo(
+    () => (search.data ?? []).map((profile) => ({ profile, relationship: getRelationshipStatus(profile.id, relationshipLists) })),
+    [search.data, relationshipLists]
+  );
+
+  const { mode, rows, isLoading }: { mode: FriendsTableMode; rows: FriendsTableRow[]; isLoading: boolean } = useMemo(() => {
+    if (mainTab === "friends") {
+      const friendRows = toRows(relationshipLists.friends, profileId, (friendshipId) => ({ type: "friend", friendshipId }));
+      return { mode: "friends", rows: friendRows.filter((r) => matchesFilter(r, tableFilter)), isLoading: friends.isLoading };
+    }
+
+    if (mainTab === "blocked") {
+      const blockedRows = toBlockedRows(relationshipLists.blocked);
+      return { mode: "blocked", rows: blockedRows.filter((r) => matchesFilter(r, tableFilter)), isLoading: blocked.isLoading };
+    }
+
+    if (pendingSubTab === "incoming") {
+      const incomingRows = toRows(relationshipLists.incoming, profileId, (friendshipId) => ({ type: "incomingPending", friendshipId }));
+      return { mode: "pendingIncoming", rows: incomingRows.filter((r) => matchesFilter(r, tableFilter)), isLoading: incoming.isLoading };
+    }
+
+    const outgoingRows = toRows(relationshipLists.outgoing, profileId, (friendshipId) => ({ type: "outgoingPending", friendshipId }));
+    return { mode: "pendingOutgoing", rows: outgoingRows.filter((r) => matchesFilter(r, tableFilter)), isLoading: outgoing.isLoading };
+  }, [mainTab, pendingSubTab, relationshipLists, profileId, tableFilter, friends.isLoading, blocked.isLoading, incoming.isLoading, outgoing.isLoading]);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Friends</Text>
+      <View style={styles.searchWrapper}>
+        <SearchBar
+          value={globalSearch}
+          onChangeText={setGlobalSearch}
+          onSubmit={() => setSearchQuery(globalSearch)}
+          placeholder="Find new users..."
+        />
+
+        {showSearchResults && (
+          <View style={styles.searchOverlay}>
+            {search.isLoading ? (
+              <ActivityIndicator style={styles.loading} color={Palette["grey-500"]} />
+            ) : (
+              <FriendsTable rows={searchRows} mode="search" onSelectRow={setSelectedRow} />
+            )}
+          </View>
+        )}
+      </View>
+
+      <View style={styles.tabsRow}>
+        <View style={styles.tabsColumn}>
+          <Tabs options={MAIN_TABS} value={mainTab} onChange={setMainTab} />
+          {mainTab === "pending" && <Tabs options={PENDING_SUB_TABS} value={pendingSubTab} onChange={setPendingSubTab} />}
+        </View>
+        <SearchBar value={tableFilter} onChangeText={setTableFilter} placeholder="Filter..." />
+      </View>
+
+      {isLoading ? (
+        <ActivityIndicator style={styles.loading} color={Palette["grey-500"]} />
+      ) : (
+        <FriendsTable rows={rows} mode={mode} onSelectRow={setSelectedRow} />
+      )}
+
+      <ManageFriendModal
+        visible={selectedRow !== null}
+        onClose={() => setSelectedRow(null)}
+        profile={selectedRow?.profile ?? null}
+        relationship={selectedRow?.relationship ?? { type: "none" }}
+        myProfileId={profileId}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: "center", justifyContent: "center" },
-  title: { fontSize: 20, fontWeight: "600" },
+  container: { flex: 1, backgroundColor: Palette["grey-50"], padding: 16, gap: 12 },
+  searchWrapper: { zIndex: 20 },
+  searchOverlay: {
+    position: "absolute",
+    top: "100%",
+    left: 0,
+    right: 0,
+    marginTop: 4,
+    maxHeight: 280,
+    zIndex: 20,
+    elevation: 6,
+    backgroundColor: friendsTableColors.background,
+    borderColor: friendsTableColors.border,
+    borderWidth: 1,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+  },
+  tabsRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 12 },
+  tabsColumn: { gap: 8 },
+  loading: { marginTop: 32 },
 });

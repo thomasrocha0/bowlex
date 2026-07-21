@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../../lib/supabase";
 
 interface CreateSeriesWithGamesInput {
   /** Only used for cache invalidation -- the server derives ownership from auth.uid(). */
@@ -26,7 +26,6 @@ export function useCreateSeriesWithGames() {
       const { data, error } = await supabase.rpc("create_series_with_games", {
         p_bowled_at: bowledAt,
         p_games: games,
-        p_league_id: null,
       });
       if (error) throw error;
       return data;

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../../lib/supabase";
 
 /** Accepted friendships for the current user, joined against the other party's profile. */
 export function useFriends(profileId: string) {

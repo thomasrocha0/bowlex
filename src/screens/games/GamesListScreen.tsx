@@ -4,8 +4,8 @@ import { Button } from "../../components/Button";
 import { Palette } from "../../components/Palette";
 import { AddGamesModal } from "../../components/games/AddGamesModal";
 import { GamesTable } from "../../components/games/GamesTable";
-import { useGames } from "../../hooks/useGames";
-import { useSession } from "../../hooks/useSession";
+import { useGames } from "../../hooks/games/useGames";
+import { useSession } from "../../hooks/auth/useSession";
 import type { GamesSortOption } from "../../lib/gamesSort";
 import { useGamesStore } from "../../store/useGamesStore";
 

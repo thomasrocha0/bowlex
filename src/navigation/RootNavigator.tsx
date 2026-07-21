@@ -4,7 +4,7 @@ import { SignInScreen } from "../screens/auth/SignInScreen";
 import { SignUpScreen } from "../screens/auth/SignUpScreen";
 import { GameDetailScreen } from "../screens/games/GameDetailScreen";
 import { FriendProfileScreen } from "../screens/social/FriendProfileScreen";
-import { useSession } from "../hooks/useSession";
+import { useSession } from "../hooks/auth/useSession";
 import { MainTabNavigator } from "./MainTabNavigator";
 import type { RootStackParamList } from "./types";
 

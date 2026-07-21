@@ -2,7 +2,7 @@ import { useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ZodError } from "zod";
-import { useSignUp } from "../../hooks/useSignUp";
+import { useSignUp } from "../../hooks/auth/useSignUp";
 import { credentialsSchema, getAuthErrorMessage } from "../../lib/auth";
 import type { RootStackParamList } from "../../navigation/types";
 

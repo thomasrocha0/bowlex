@@ -19,3 +19,25 @@ export type GameWithFrames = GameRow & {
   frames: FrameRow[];
   series: { bowled_at: string } | null;
 };
+
+export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+export type FriendshipRow = Database["public"]["Tables"]["friendships"]["Row"];
+/** A friendship row as returned by the hooks that embed one or both parties' profiles. */
+export type FriendshipWithProfiles = FriendshipRow & {
+  requester?: ProfileRow;
+  addressee?: ProfileRow;
+};
+
+export type BlockRow = Database["public"]["Tables"]["blocks"]["Row"];
+/** A block row as returned by useBlockedUsers, with the blocked party's profile embedded. */
+export type BlockWithProfile = BlockRow & {
+  blocked?: ProfileRow;
+};
+
+/** The current user's relationship to some other profile, and the row backing it (if any). */
+export type RelationshipStatus =
+  | { type: "friend"; friendshipId: string }
+  | { type: "incomingPending"; friendshipId: string }
+  | { type: "outgoingPending"; friendshipId: string }
+  | { type: "blocked"; blockId: string }
+  | { type: "none" };

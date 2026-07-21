@@ -34,6 +34,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       frames: {
         Row: {
           created_at: string
@@ -292,10 +328,46 @@ export type Database = {
       }
     }
     Functions: {
+      accept_friend_request: {
+        Args: { p_friendship_id: string }
+        Returns: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          status: Database["public"]["Enums"]["friendship_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "friendships"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      block_user: {
+        Args: { p_blocked_id: string }
+        Returns: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "blocks"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       calculate_game_score: { Args: { p_rolls: number[] }; Returns: number }
       create_series_with_games: {
-        Args: { p_bowled_at: string; p_games: Json; p_league_id?: string | null }
-        Returns: { series_id: string; game_id: string; game_number: number }[]
+        Args: { p_bowled_at: string; p_games: Json; p_league_id?: string }
+        Returns: {
+          game_id: string
+          game_number: number
+          series_id: string
+        }[]
       }
       get_friend_stats: {
         Args: { target_profile_id: string }
@@ -308,9 +380,17 @@ export type Database = {
           strike_percentage: number
         }[]
       }
+      is_blocked_by: {
+        Args: { p_blocker_id: string; p_viewer_id: string }
+        Returns: boolean
+      }
+      is_valid_frame_rolls: {
+        Args: { p_frame_number: number; p_rolls: number[] }
+        Returns: boolean
+      }
     }
     Enums: {
-      friendship_status: "pending" | "accepted" | "declined" | "blocked"
+      friendship_status: "pending" | "accepted"
       stats_visibility: "public" | "friends_only" | "private"
     }
     CompositeTypes: {
@@ -442,7 +522,7 @@ export const Constants = {
   },
   public: {
     Enums: {
-      friendship_status: ["pending", "accepted", "declined", "blocked"],
+      friendship_status: ["pending", "accepted"],
       stats_visibility: ["public", "friends_only", "private"],
     },
   },

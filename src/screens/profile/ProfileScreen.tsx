@@ -1,5 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useSignOut } from "../../hooks/useSignOut";
+import { useSignOut } from "../../hooks/auth/useSignOut";
 
 export function ProfileScreen() {
   const signOut = useSignOut();

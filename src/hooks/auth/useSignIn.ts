@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
-import { supabase } from "../lib/supabase";
-import { credentialsSchema, usernameToAuthEmail, type Credentials } from "../lib/auth";
+import { supabase } from "../../lib/supabase";
+import { credentialsSchema, usernameToAuthEmail, type Credentials } from "../../lib/auth";
 
 export function useSignIn() {
   return useMutation({

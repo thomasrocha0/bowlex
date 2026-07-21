@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "../lib/supabase";
-import type { GameStats } from "../types";
+import { supabase } from "../../lib/supabase";
+import type { GameStats } from "../../types";
 
 /**
  * Calls the `get_friend_stats` Postgres function (security-definer), which
